@@ -1,228 +1,352 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Circle the Pictures – Letter Sound Game</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f8f9fa;
-      text-align: center;
-      padding: 20px;
-    }
-    #game {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 20px;
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-    h2 { color: #0077b6; }
-    #target-letter {
-      font-size: 28px;
-      font-weight: bold;
-      margin: 10px 0;
-    }
-    #pictures {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 15px;
-      margin: 20px auto;
-    }
-    .picture {
-      position: relative;
-      width: 120px;
-      height: 120px;
-      border: 2px dashed #ccc;
-      border-radius: 10px;
-      overflow: hidden;
-      cursor: pointer;
-      transition: transform 0.2s;
-    }
-    .picture:hover {
-      transform: scale(1.05);
-    }
-    .picture img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    .circle {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 110px;
-      height: 110px;
-      border: 4px solid #0077b6;
-      border-radius: 50%;
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity 0.2s;
-    }
-    .circled .circle {
-      opacity: 1;
-    }
-    #buttons {
-      margin: 20px 0;
-    }
-    button {
-      margin: 0 10px;
-      padding: 10px 20px;
-      font-size: 16px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-    #check-btn {
-      background-color: #0077b6;
-      color: white;
-    }
-    #next-btn {
-      background-color: #28a745;
-      color: white;
-    }
-    #feedback {
-      margin: 15px 0;
-      font-size: 18px;
-      font-weight: bold;
-    }
-  </style>
+<meta charset="UTF-8">
+<title>Phonics Sound Game</title>
+
+<style>
+body {
+  font-family: Arial;
+  text-align: center;
+  background: #eef7ff;
+}
+
+#game {
+  max-width: 900px;
+  margin: auto;
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+}
+
+.picture {
+  width: 120px;
+  height: 120px;
+  border: 2px dashed #ccc;
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  position: relative;
+}
+
+.picture img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.circle {
+  position: absolute;
+  width: 110px;
+  height: 110px;
+  border: 4px solid blue;
+  border-radius: 50%;
+  top: 5px;
+  left: 5px;
+  display: none;
+}
+
+.circled .circle {
+  display: block;
+}
+
+#pictures {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  justify-content: center;
+}
+
+button {
+  padding: 10px 15px;
+  margin: 10px;
+  font-size: 16px;
+}
+</style>
 </head>
+
 <body>
-  <div id="game">
-    <h2>Circle the Pictures</h2>
-    <p>Click on the pictures that start with this sound:</p>
-    <div id="target-letter"></div>
 
-    <div id="pictures"></div>
+<div id="game">
+  <h2>Circle the Pictures</h2>
+  <p>Click the pictures that match this sound:</p>
+  <h1 id="target-letter"></h1>
 
-    <div id="buttons">
-      <button id="check-btn">Check Answers</button>
-      <button id="next-btn">Next Round</button>
-    </div>
+  <button onclick="playSound()">🔊 Play Sound</button>
 
-    <div id="feedback"></div>
-  </div>
+  <div id="pictures"></div>
 
-  <script>
-    // Define your levels: letter sound + image list
-    const levels = [
-      {
-        sound: "b",
-        pictures: [
-          { src: "https://img.freepik.com/free-vector/cartoon-bunch-bananas-isolated-illustration_138676-2427.jpg", word: "banana", correct: true },
-          { src: "https://img.freepik.com/free-vector/cartoon-bear-sitting-grass-illustration_138676-2428.jpg", word: "bear", correct: true },
-          { src: "https://img.freepik.com/free-vector/cartoon-apple-illustration_138676-2429.jpg", word: "apple", correct: false },
-          { src: "https://img.freepik.com/free-vector/cartoon-cake-illustration_138676-2430.jpg", word: "cake", correct: false },
-          { src: "https://img.freepik.com/free-vector/cartoon-bell-ringing-illustration_138676-2431.jpg", word: "bell", correct: true },
-          { src: "https://img.freepik.com/free-vector/cartoon-bicycle-illustration_138676-2432.jpg", word: "bike", correct: true },
-        ]
-      },
-      {
-        sound: "m",
-        pictures: [
-          { src: "https://img.freepik.com/free-vector/cartoon-mango-illustration_138676-2433.jpg", word: "mango", correct: true },
-          { src: "https://img.freepik.com/free-vector/cartoon-mouse-illustration_138676-2434.jpg", word: "mouse", correct: true },
-          { src: "https://img.freepik.com/free-vector/football-illustration_138676-2435.jpg", word: "ball", correct: false },
-          { src: "https://img.freepik.com/free-vector/cartoon-moon-illustration_138676-2436.jpg", word: "moon", correct: true },
-          { src: "https://img.freepik.com/free-vector/cartoon-man-illustration_138676-2437.jpg", word: "man", correct: true },
-          { src: "https://img.freepik.com/free-vector/cartoon-dog-illustration_138676-2438.jpg", word: "dog", correct: false },
-        ]
-      }
-    ];
+  <button onclick="checkAnswers()">Check</button>
+  <button onclick="nextLevel()">Next</button>
 
-    const picturesEl = document.getElementById("pictures");
-    const targetLetterEl = document.getElementById("target-letter");
-    const feedbackEl = document.getElementById("feedback");
-    const checkBtn = document.getElementById("check-btn");
-    const nextBtn = document.getElementById("next-btn");
+  <h3 id="feedback"></h3>
+</div>
 
-    let currentLevel = 0;
-    let selectedEls = new Set();
+<script>
 
-    function initGame() {
-      if (currentLevel >= levels.length) {
-        feedbackEl.textContent = "🎉 All done! Great job!";
-        picturesEl.innerHTML = "";
-        checkBtn.disabled = true;
-        nextBtn.disabled = true;
-        return;
-      }
+// ✅ YOUR GITHUB PATH
+const basePath = "https://sheetalsingh-123.github.io/phonics-games/phonics-games/assets/";
 
-      const level = levels[currentLevel];
-      targetLetterEl.textContent = level.sound.toUpperCase();
+// ✅ LEVELS (A–Z, using your files)
+const levels = [
+{ sound:"a", audio:basePath+"a.mp3", pictures:[
+{src:basePath+"ant.jpg", correct:true},
+{src:basePath+"alligator.jpg", correct:true},
+{src:basePath+"balloons.jpg", correct:false},
+{src:basePath+"cup.jpg", correct:false}
+]},
 
-      // Clear previous round
-      picturesEl.innerHTML = "";
-      selectedEls.clear();
-      feedbackEl.textContent = "";
+{ sound:"b", audio:basePath+"b.mp3", pictures:[
+{src:basePath+"balloons.jpg", correct:true},
+{src:basePath+"bag.jpg", correct:true},
+{src:basePath+"ant.jpg", correct:false},
+{src:basePath+"cup.jpg", correct:false}
+]},
 
-      // Add images
-      level.pictures.forEach((pic, index) => {
-        const div = document.createElement("div");
-        div.className = "picture";
-        div.dataset.word = pic.word;
-        div.dataset.correct = pic.correct;
+{ sound:"c", audio:basePath+"c.mp3", pictures:[
+{src:basePath+"cup.jpg", correct:true},
+{src:basePath+"cat.jpg", correct:true},
+{src:basePath+"dog.jpg", correct:false},
+{src:basePath+"sun.jpg", correct:false}
+]},
 
-        const img = document.createElement("img");
-        img.src = pic.src;
-        img.alt = pic.word;
+{ sound:"d", audio:basePath+"d.mp3", pictures:[
+{src:basePath+"dog.jpg", correct:true},
+{src:basePath+"duck.jpg", correct:true},
+{src:basePath+"cat.jpg", correct:false},
+{src:basePath+"sun.jpg", correct:false}
+]},
 
-        const circle = document.createElement("div");
-        circle.className = "circle";
+{ sound:"e", audio:basePath+"e.mp3", pictures:[
+{src:basePath+"eggs.jpg", correct:true},
+{src:basePath+"elephant.jpg", correct:true},
+{src:basePath+"fish.jpg", correct:false},
+{src:basePath+"goat.jpg", correct:false}
+]},
 
-        div.appendChild(img);
-        div.appendChild(circle);
-        picturesEl.appendChild(div);
+{ sound:"f", audio:basePath+"f.mp3", pictures:[
+{src:basePath+"fish.jpg", correct:true},
+{src:basePath+"flowers.jpg", correct:true},
+{src:basePath+"goat.jpg", correct:false},
+{src:basePath+"gate.jpg", correct:false}
+]},
 
-        // Toggle circle on click
-        div.addEventListener("click", () => {
-          if (div.classList.contains("circled")) {
-            div.classList.remove("circled");
-            selectedEls.delete(div);
-          } else {
-            div.classList.add("circled");
-            selectedEls.add(div);
-          }
-        });
-      });
-    }
+{ sound:"g", audio:basePath+"g.mp3", pictures:[
+{src:basePath+"goat.jpg", correct:true},
+{src:basePath+"gate.jpg", correct:true},
+{src:basePath+"horse.jpg", correct:false},
+{src:basePath+"fish.jpg", correct:false}
+]},
 
-    function checkAnswers() {
-      const level = levels[currentLevel];
-      let correctHits = 0;
-      let totalCorrect = level.pictures.filter(p => p.correct).length;
+{ sound:"h", audio:basePath+"h.mp3", pictures:[
+{src:basePath+"helicopter.jpg", correct:true},
+{src:basePath+"horse.jpg", correct:true},
+{src:basePath+"igloo.jpg", correct:false},
+{src:basePath+"goat.jpg", correct:false}
+]},
 
-      let wrongSelects = 0;
+{ sound:"i", audio:basePath+"i.mp3", pictures:[
+{src:basePath+"igloo.jpg", correct:true},
+{src:basePath+"injection.jpg", correct:true},
+{src:basePath+"jar.jpg", correct:false},
+{src:basePath+"kite.jpg", correct:false}
+]},
 
-      for (const el of selectedEls) {
-        const isCorrect = el.dataset.correct === "true";
-        if (isCorrect) correctHits++;
-        else wrongSelects++;
-      }
+{ sound:"j", audio:basePath+"j.mp3", pictures:[
+{src:basePath+"jug.jpg", correct:true},
+{src:basePath+"jar.jpg", correct:true},
+{src:basePath+"kite.jpg", correct:false},
+{src:basePath+"lamp.jpg", correct:false}
+]},
 
-      if (wrongSelects > 0) {
-        feedbackEl.textContent = "❌ Oops! Some wrong pictures were circled.";
-      } else if (correctHits === totalCorrect) {
-        feedbackEl.textContent = "✅ Perfect! You circled all correct pictures.";
-      } else if (correctHits === 0) {
-        feedbackEl.textContent = "❗ None correct yet. Try again!";
-      } else {
-        feedbackEl.textContent = `🟡 You got ${correctHits} of ${totalCorrect} correct.`;
-      }
-    }
+{ sound:"k", audio:basePath+"k.mp3", pictures:[
+{src:basePath+"kite.jpg", correct:true},
+{src:basePath+"kangaroo.jpg", correct:true},
+{src:basePath+"lamp.jpg", correct:false},
+{src:basePath+"leaf.jpg", correct:false}
+]},
 
-    checkBtn.addEventListener("click", checkAnswers);
-    nextBtn.addEventListener("click", () => {
-      currentLevel++;
-      initGame();
-    });
+{ sound:"l", audio:basePath+"l.mp3", pictures:[
+{src:basePath+"lamp.jpg", correct:true},
+{src:basePath+"leaf.jpg", correct:true},
+{src:basePath+"mango.jpg", correct:false},
+{src:basePath+"map.jpg", correct:false}
+]},
 
-    // Start the first round
-    initGame();
-  </script>
+{ sound:"m", audio:basePath+"m.mp3", pictures:[
+{src:basePath+"mango.jpg", correct:true},
+{src:basePath+"map.jpg", correct:true},
+{src:basePath+"nose.jpg", correct:false},
+{src:basePath+"nest.jpg", correct:false}
+]},
+
+{ sound:"n", audio:basePath+"n.mp3", pictures:[
+{src:basePath+"nose.jpg", correct:true},
+{src:basePath+"nest.jpg", correct:true},
+{src:basePath+"orange.jpg", correct:false},
+{src:basePath+"octopus.jpg", correct:false}
+]},
+
+{ sound:"o", audio:basePath+"o.mp3", pictures:[
+{src:basePath+"orange.jpg", correct:true},
+{src:basePath+"octopus.jpg", correct:true},
+{src:basePath+"pencil.jpg", correct:false},
+{src:basePath+"penguin.jpg", correct:false}
+]},
+
+{ sound:"p", audio:basePath+"p.mp3", pictures:[
+{src:basePath+"pencil.jpg", correct:true},
+{src:basePath+"penguin.jpg", correct:true},
+{src:basePath+"queen.jpg", correct:false},
+{src:basePath+"quilt.jpg", correct:false}
+]},
+
+{ sound:"q", audio:basePath+"q.mp3", pictures:[
+{src:basePath+"queen.jpg", correct:true},
+{src:basePath+"quilt.jpg", correct:true},
+{src:basePath+"rocket.jpg", correct:false},
+{src:basePath+"rainbow.jpg", correct:false}
+]},
+
+{ sound:"r", audio:basePath+"r.mp3", pictures:[
+{src:basePath+"rocket.jpg", correct:true},
+{src:basePath+"rainbow.jpg", correct:true},
+{src:basePath+"sun.jpg", correct:false},
+{src:basePath+"sandwich.jpg", correct:false}
+]},
+
+{ sound:"s", audio:basePath+"s.mp3", pictures:[
+{src:basePath+"sun.jpg", correct:true},
+{src:basePath+"sandwich.jpg", correct:true},
+{src:basePath+"tree.jpg", correct:false},
+{src:basePath+"tent.jpg", correct:false}
+]},
+
+{ sound:"t", audio:basePath+"t.mp3", pictures:[
+{src:basePath+"tree.jpg", correct:true},
+{src:basePath+"tent.jpg", correct:true},
+{src:basePath+"umbrella.jpg", correct:false},
+{src:basePath+"umpire.jpg", correct:false}
+]},
+
+{ sound:"u", audio:basePath+"u.mp3", pictures:[
+{src:basePath+"umbrella.jpg", correct:true},
+{src:basePath+"umpire.jpg", correct:true},
+{src:basePath+"van.jpg", correct:false},
+{src:basePath+"volcano.jpg", correct:false}
+]},
+
+{ sound:"v", audio:basePath+"v.mp3", pictures:[
+{src:basePath+"van.jpg", correct:true},
+{src:basePath+"volcano.jpg", correct:true},
+{src:basePath+"watermelon.jpg", correct:false},
+{src:basePath+"window.jpg", correct:false}
+]},
+
+{ sound:"w", audio:basePath+"w.mp3", pictures:[
+{src:basePath+"watermelon.jpg", correct:true},
+{src:basePath+"window.jpg", correct:true},
+{src:basePath+"xray.jpg", correct:false},
+{src:basePath+"xylophone.jpg", correct:false}
+]},
+
+{ sound:"x", audio:basePath+"x.mp3", pictures:[
+{src:basePath+"xray.jpg", correct:true},
+{src:basePath+"xylophone.jpg", correct:true},
+{src:basePath+"yoyo.jpg", correct:false},
+{src:basePath+"yam.jpg", correct:false}
+]},
+
+{ sound:"y", audio:basePath+"y.mp3", pictures:[
+{src:basePath+"yoyo.jpg", correct:true},
+{src:basePath+"yam.jpg", correct:true},
+{src:basePath+"zebra.jpg", correct:false},
+{src:basePath+"zip.jpg", correct:false}
+]},
+
+{ sound:"z", audio:basePath+"z.mp3", pictures:[
+{src:basePath+"zebra.jpg", correct:true},
+{src:basePath+"zip.jpg", correct:true},
+{src:basePath+"ant.jpg", correct:false},
+{src:basePath+"balloons.jpg", correct:false}
+]}
+];
+
+// GAME LOGIC
+let currentLevel = 0;
+let selected = new Set();
+let audio;
+
+function loadLevel() {
+  const level = levels[currentLevel];
+  document.getElementById("target-letter").textContent = level.sound.toUpperCase();
+
+  audio = new Audio(level.audio);
+
+  const container = document.getElementById("pictures");
+  container.innerHTML = "";
+  selected.clear();
+
+  level.pictures.forEach(pic => {
+    const div = document.createElement("div");
+    div.className = "picture";
+    div.dataset.correct = pic.correct;
+
+    div.innerHTML = `
+      <img src="${pic.src}">
+      <div class="circle"></div>
+    `;
+
+    div.onclick = () => {
+      div.classList.toggle("circled");
+      if (selected.has(div)) selected.delete(div);
+      else selected.add(div);
+    };
+
+    container.appendChild(div);
+  });
+
+  // 🔊 Auto play sound
+  setTimeout(() => playSound(), 500);
+}
+
+function playSound() {
+  if (audio) {
+    audio.currentTime = 0;
+    audio.play();
+  }
+}
+
+function checkAnswers() {
+  let correct = 0, wrong = 0;
+
+  selected.forEach(el => {
+    if (el.dataset.correct === "true") correct++;
+    else wrong++;
+  });
+
+  const total = levels[currentLevel].pictures.filter(p=>p.correct).length;
+
+  if (wrong > 0) {
+    feedback.textContent = "❌ Some are incorrect";
+  } else if (correct === total) {
+    feedback.textContent = "✅ Perfect!";
+  } else {
+    feedback.textContent = "🟡 Try again!";
+  }
+}
+
+function nextLevel() {
+  currentLevel++;
+  if (currentLevel >= levels.length) {
+    feedback.textContent = "🎉 Game Complete!";
+    return;
+  }
+  loadLevel();
+}
+
+loadLevel();
+</script>
+
 </body>
 </html>
