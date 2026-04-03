@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Circle the Pictures – Letter Sound Game</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f8f9fa;
+      text-align: center;
+      padding: 20px;
+    }
+    #game {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    h2 { color: #0077b6; }
+    #target-letter {
+      font-size: 28px;
+      font-weight: bold;
+      margin: 10px 0;
+    }
+    #pictures {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 15px;
+      margin: 20px auto;
+    }
+    .picture {
+      position: relative;
+      width: 120px;
+      height: 120px;
+      border: 2px dashed #ccc;
+      border-radius: 10px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .picture:hover {
+      transform: scale(1.05);
+    }
+    .picture img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .circle {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 110px;
+      height: 110px;
+      border: 4px solid #0077b6;
+      border-radius: 50%;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .circled .circle {
+      opacity: 1;
+    }
+    #buttons {
+      margin: 20px 0;
+    }
+    button {
+      margin: 0 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    #check-btn {
+      background-color: #0077b6;
+      color: white;
+    }
+    #next-btn {
+      background-color: #28a745;
+      color: white;
+    }
+    #feedback {
+      margin: 15px 0;
+      font-size: 18px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div id="game">
+    <h2>Circle the Pictures</h2>
+    <p>Click on the pictures that start with this sound:</p>
+    <div id="target-letter"></div>
+
+    <div id="pictures"></div>
+
+    <div id="buttons">
+      <button id="check-btn">Check Answers</button>
+      <button id="next-btn">Next Round</button>
+    </div>
+
+    <div id="feedback"></div>
+  </div>
+
+  <script>
+    // Define your levels: letter sound + image list
+    const levels = [
+      {
+        sound: "b",
+        pictures: [
+          { src: "https://img.freepik.com/free-vector/cartoon-bunch-bananas-isolated-illustration_138676-2427.jpg", word: "banana", correct: true },
+          { src: "https://img.freepik.com/free-vector/cartoon-bear-sitting-grass-illustration_138676-2428.jpg", word: "bear", correct: true },
+          { src: "https://img.freepik.com/free-vector/cartoon-apple-illustration_138676-2429.jpg", word: "apple", correct: false },
+          { src: "https://img.freepik.com/free-vector/cartoon-cake-illustration_138676-2430.jpg", word: "cake", correct: false },
+          { src: "https://img.freepik.com/free-vector/cartoon-bell-ringing-illustration_138676-2431.jpg", word: "bell", correct: true },
+          { src: "https://img.freepik.com/free-vector/cartoon-bicycle-illustration_138676-2432.jpg", word: "bike", correct: true },
+        ]
+      },
+      {
+        sound: "m",
+        pictures: [
+          { src: "https://img.freepik.com/free-vector/cartoon-mango-illustration_138676-2433.jpg", word: "mango", correct: true },
+          { src: "https://img.freepik.com/free-vector/cartoon-mouse-illustration_138676-2434.jpg", word: "mouse", correct: true },
+          { src: "https://img.freepik.com/free-vector/football-illustration_138676-2435.jpg", word: "ball", correct: false },
+          { src: "https://img.freepik.com/free-vector/cartoon-moon-illustration_138676-2436.jpg", word: "moon", correct: true },
+          { src: "https://img.freepik.com/free-vector/cartoon-man-illustration_138676-2437.jpg", word: "man", correct: true },
+          { src: "https://img.freepik.com/free-vector/cartoon-dog-illustration_138676-2438.jpg", word: "dog", correct: false },
+        ]
+      }
+    ];
+
+    const picturesEl = document.getElementById("pictures");
+    const targetLetterEl = document.getElementById("target-letter");
+    const feedbackEl = document.getElementById("feedback");
+    const checkBtn = document.getElementById("check-btn");
+    const nextBtn = document.getElementById("next-btn");
+
+    let currentLevel = 0;
+    let selectedEls = new Set();
+
+    function initGame() {
+      if (currentLevel >= levels.length) {
+        feedbackEl.textContent = "🎉 All done! Great job!";
+        picturesEl.innerHTML = "";
+        checkBtn.disabled = true;
+        nextBtn.disabled = true;
+        return;
+      }
+
+      const level = levels[currentLevel];
+      targetLetterEl.textContent = level.sound.toUpperCase();
+
+      // Clear previous round
+      picturesEl.innerHTML = "";
+      selectedEls.clear();
+      feedbackEl.textContent = "";
+
+      // Add images
+      level.pictures.forEach((pic, index) => {
+        const div = document.createElement("div");
+        div.className = "picture";
+        div.dataset.word = pic.word;
+        div.dataset.correct = pic.correct;
+
+        const img = document.createElement("img");
+        img.src = pic.src;
+        img.alt = pic.word;
+
+        const circle = document.createElement("div");
+        circle.className = "circle";
+
+        div.appendChild(img);
+        div.appendChild(circle);
+        picturesEl.appendChild(div);
+
+        // Toggle circle on click
+        div.addEventListener("click", () => {
+          if (div.classList.contains("circled")) {
+            div.classList.remove("circled");
+            selectedEls.delete(div);
+          } else {
+            div.classList.add("circled");
+            selectedEls.add(div);
+          }
+        });
+      });
+    }
+
+    function checkAnswers() {
+      const level = levels[currentLevel];
+      let correctHits = 0;
+      let totalCorrect = level.pictures.filter(p => p.correct).length;
+
+      let wrongSelects = 0;
+
+      for (const el of selectedEls) {
+        const isCorrect = el.dataset.correct === "true";
+        if (isCorrect) correctHits++;
+        else wrongSelects++;
+      }
+
+      if (wrongSelects > 0) {
+        feedbackEl.textContent = "❌ Oops! Some wrong pictures were circled.";
+      } else if (correctHits === totalCorrect) {
+        feedbackEl.textContent = "✅ Perfect! You circled all correct pictures.";
+      } else if (correctHits === 0) {
+        feedbackEl.textContent = "❗ None correct yet. Try again!";
+      } else {
+        feedbackEl.textContent = `🟡 You got ${correctHits} of ${totalCorrect} correct.`;
+      }
+    }
+
+    checkBtn.addEventListener("click", checkAnswers);
+    nextBtn.addEventListener("click", () => {
+      currentLevel++;
+      initGame();
+    });
+
+    // Start the first round
+    initGame();
+  </script>
+</body>
+</html>
